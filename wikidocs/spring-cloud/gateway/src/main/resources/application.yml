@@ -53,3 +53,10 @@ spring:
 # ?? ??????? ????? ?? ??
 jwt:
   secret: 'a_very_long_and_secure_secret_key_for_ecommerce_project_that_is_at_least_256_bits_long'
+
+security:
+  required-roles:
+    - path: /api/v1/admin/**
+      role: ADMIN
+    - path: /api/v1/orders/**
+      role: USER
