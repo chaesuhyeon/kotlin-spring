@@ -1,0 +1,16 @@
+server:
+  port: 8761 # Eureka \uC11C\uBC84\uC758 \uAE30\uBCF8 \uD3EC\uD2B8
+
+spring:
+  application:
+    name: discovery-service
+
+eureka:
+  client:
+    # Eureka \uC11C\uBC84\uB294 \uC790\uC2E0\uC744 '\uD074\uB77C\uC774\uC5B8\uD2B8'\uB85C\uC11C \uB4F1\uB85D\uD558\uC9C0 \uC54A\uC74C
+    register-with-eureka: false
+    # \uB808\uC9C0\uC2A4\uD2B8\uB9AC \uC815\uBCF4\uB97C \uB85C\uCEEC\uC5D0 \uCE90\uC2F1\uD558\uC9C0 \uC54A\uC74C
+    fetch-registry: false
+  server:
+    # (\uAC1C\uBC1C \uD658\uACBD) \uD074\uB77C\uC774\uC5B8\uD2B8\uC758 \uD558\uD2B8\uBE44\uD2B8\uAC00 \uC5C6\uC5B4\uB3C4 \uC989\uC2DC \uC81C\uAC70\uD558\uC9C0 \uC54A\uB3C4\uB85D \uC124\uC815
+    eviction-interval-timer-in-ms: 10000
