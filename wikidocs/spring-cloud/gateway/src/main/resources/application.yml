@@ -87,3 +87,12 @@ security:
       role: ADMIN
     - path: /api/v1/orders/** # '/api/v1/orders/**' ??? USER ??? ??
       role: USER
+
+eureka:
+  client:
+    service-url:
+      # 2. Eureka ??(?)? ??.
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    # 3. IP ??? ????? ??
+    prefer-ip-address: true

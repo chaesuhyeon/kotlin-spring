@@ -25,6 +25,9 @@ dependencies {
     // (내부에 spring-boot-starter-webflux, netty 포함 -> starter-web을 같이 넣어주면 충돌남)
     implementation("org.springframework.cloud:spring-cloud-starter-gateway")
 
+    // Eureka 클라이언트 스타터
+    implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
+
     // 코루틴과 Reactor(WebFlux)를 함께 사용하기 위한 의존성
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 
