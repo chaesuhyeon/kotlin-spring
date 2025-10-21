@@ -31,12 +31,22 @@ dependencies {
     // ========== 테스트용 H2 데이터베이스 ==========
     runtimeOnly("com.h2database:h2")
 
+    // Eureka 클라이언트 스타터
+    implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
+
     // ========== test ========== //
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.kotest:kotest-runner-junit5-jvm:5.8.1") // Kotest Runner (JUnit5 위에서 동작)
     testImplementation("io.kotest:kotest-assertions-core-jvm:5.8.1") // Kotest Assertions
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.3") // Spring과 Kotest를 연동하기 위한 라이브러리
     testImplementation("io.mockk:mockk:1.13.10") // 코틀린 네이티브 Mocking 라이브러리
+}
+
+// Spring Cloud BOM 설정 필수
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2023.0.1")
+    }
 }
 
 kotlin {
