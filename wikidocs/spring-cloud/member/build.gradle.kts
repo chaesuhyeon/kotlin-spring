@@ -31,8 +31,14 @@ dependencies {
     // ========== 테스트용 H2 데이터베이스 ==========
     runtimeOnly("com.h2database:h2")
 
-    // Eureka 클라이언트 스타터
-    implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
+    // Eureka 클라이언트 스타터 (비활성화 -> Consul 클라이언트로 변경)
+//    implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
+
+    // Consul 디스커버리 클라이언트 의존성 추가
+    implementation("org.springframework.cloud:spring-cloud-starter-consul-discovery")
+
+    // (필수) Consul의 헬스 체크를 위한 Actuator 의존성 추가
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
 
     // ========== test ========== //
     testImplementation("org.springframework.boot:spring-boot-starter-test")
