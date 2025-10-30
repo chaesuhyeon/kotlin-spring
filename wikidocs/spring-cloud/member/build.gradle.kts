@@ -40,6 +40,9 @@ dependencies {
     // (필수) Consul의 헬스 체크를 위한 Actuator 의존성 추가
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 
+    // config client
+    implementation("org.springframework.cloud:spring-cloud-starter-config")
+
     // ========== test ========== //
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.kotest:kotest-runner-junit5-jvm:5.8.1") // Kotest Runner (JUnit5 위에서 동작)
