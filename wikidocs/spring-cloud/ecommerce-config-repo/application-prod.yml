@@ -1,0 +1,4 @@
+# 운영 환경에서는 로그 레벨을 INFO로 설정
+logging:
+  level:
+    root: INFO

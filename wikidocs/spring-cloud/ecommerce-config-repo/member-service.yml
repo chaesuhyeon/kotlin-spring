@@ -1,0 +1,5 @@
+server:
+  port: 8081 # member-service의 기본 포트
+
+member:
+  greeting: "Hello, Default Member!" # 기본 인사말

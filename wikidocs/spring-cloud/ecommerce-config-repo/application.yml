@@ -1,0 +1,5 @@
+# Eureka 주소는 모든 환경에서 동일하다고 가정
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka.internal:8761/eureka/

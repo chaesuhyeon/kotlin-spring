@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    # 운영 환경에서는 고가용성이 보장된 MySQL 클러스터 사용
+    url: jdbc:mysql://prod-mysql.db.internal/memberdb
+    username: prod_user
+    password: '{cipher}...' # (암호화된 비밀번호 - 부록에서 다룸)
+  jpa:
+    hibernate:
+      ddl-auto: validate # 운영에서는 스키마 자동 생성 금지
+
+member:
+  greeting: "Hello, Production Member!" # 운영 환경용 인사말

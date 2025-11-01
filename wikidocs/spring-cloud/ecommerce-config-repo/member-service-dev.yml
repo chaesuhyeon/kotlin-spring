@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:memberdb # 개발 환경에서는 H2 DB 사용
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+member:
+  greeting: "Hello, Dev Member!" # 개발 환경용 인사말
