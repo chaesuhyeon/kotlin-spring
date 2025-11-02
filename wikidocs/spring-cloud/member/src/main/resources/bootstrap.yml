@@ -10,9 +10,11 @@ spring:
       # Config Server의 주소
       uri: http://localhost:8888
       # (만약 Config Server가 여러 대라면 fail-fast, retry 등 설정 가능)
+  profiles:
+    active: dev
 
 
-#   ======= config 동작 확인  =======
+  #   ======= config 동작 확인  =======
 #   1. config-repo Git 저장소에 설정 파일들을 푸시 (여기서는 member-service.yml 파일이 별도의 깃 저장소에 있어야함)
 #   2. discovery-service(Eureka)를 실행
 #   3. config-service(포트 8888)를 실행
