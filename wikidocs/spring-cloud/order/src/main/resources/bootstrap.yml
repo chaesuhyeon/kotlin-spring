@@ -1,0 +1,14 @@
+# application.yml은 애플리케이션의 '일반 설정' 파일임. (bootstrap.yml 사용할 경우 없어도 됨)
+# 하지만 "Config Server의 주소가 어디인가?"라는 설정은, application.yml을 읽어오기 전에 먼저 알아야 하는 '최우선 설정'.
+# bootstrap.yml은 application.yml보다 먼저 로드되는 '부트스트랩 컨텍스트' 설정 파일
+
+spring:
+  application:
+    name: order-service # Config Server에 어떤 파일을 요청할지 식별하는 ID
+  cloud:
+    config:
+      # Config Server의 주소
+      uri: http://localhost:8888
+      # (만약 Config Server가 여러 대라면 fail-fast, retry 등 설정 가능)
+  profiles:
+    active: dev
