@@ -1,0 +1,41 @@
+# Feign에 서킷 브레이커 기능 활성화
+feign:
+  circuitbreaker:
+    enabled: true
+
+# Resilience4j 서킷 브레이커 상세 설정
+resilience4j:
+  circuitbreaker:
+    # 설정 그룹(instances) 정의
+    instances:
+      # 'product-service'라는 이름의 서킷 브레이커 설정
+      # 이 이름은 FeignClient의 name/contextId와 일치시킬 수 있음
+      product-service:
+        # --- 서킷을 OPEN 상태로 전환할 조건 ---
+        sliding-window-type: COUNT_BASED # 1. 최근 호출 '횟수' 기반으로 실패율 계산
+        sliding-window-size: 10          # 2. 최근 10번의 호출을 샘플링
+        failure-rate-threshold: 50       # 3. 그 중 50% (5번) 이상 실패하면 서킷 OPEN
+
+        # --- OPEN 상태에서의 동작 ---
+        wait-duration-in-open-state: 5s  # 4. OPEN 상태를 5초간 유지. 이후 HALF_OPEN
+
+        # --- HALF_OPEN 상태에서의 동작 ---
+        permitted-number-of-calls-in-half-open-state: 3 # 5. 3번의 테스트 호출 허용
+
+        # ... 기록할 예외와 무시할 예외 ...
+        # (기본적으로 모든 예외를 실패로 간주. 특정 예외를 무시할 수도 있음)
+        # ignore-exceptions:
+        #  - com.ecommerce.order.client.ProductNotFoundException
+
+# --- 서킷 브레이커 동작 시나리오 ---
+# product-service에 장애가 발생했을 떄
+# product-service의 db 문제로 타임 아웃이 발생했으며, 최근 10번의 feign 호출 중 5번이 타임 예외로 실패한다.
+# 실패율이 50%에 도달하는 순간 Resilience4j는 서킷을 CLOSED에서 OPEN으로 전환한다.
+# 상태가 OPEN으로 전환되면 order-service는 product-service로 실제 네트워트 요청을 보내는 것을 즉시 중단한다.
+# 대신 productServiceClient.getProduct()를 호출하는 즉시, 네트워크 통신 없이 CallNotPermittedException 예외를 로컬에서 발생시킨다.
+# 이는 '그릴 스테이션'으로 가는 길 자체를 막아버려, order-service의 스레드가 헛되이 기다리는 것을 원천 차단하고, 장애가 API Gateway로 전파되는 것을 막는다.
+# wait-duration-in-open-state에 설정된 5초가 지나면, 서킷은 HALF_OPEN 상태가 된다.
+# permitted-number-of-calls-in-half-open-state에 설정된 대로, 다음 3번의 getProduct 호출은 실제 product-service로 전달된다.
+# 만약 3번이 모두 성공하면, 서킷은 product-service가 복구되었다고 판단하고, 상태를 다시 CLOSED로 전환한다. 시스템은 정상으로 돌아온다.
+# 만약 3번 중 한 번이라도 실패하면, 서킷은 product-service가 여전히 문제라고 판단하고, 상태를 다시 OPEN으로 되돌려 5초간 대기 상태에 들어간다.
+

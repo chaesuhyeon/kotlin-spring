@@ -45,6 +45,12 @@ dependencies {
     // OpenFeign 스타터
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 
+    // Spring Cloud Circuit Breaker 스타터 (Resilience4j 구현체 포함)
+    implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
+
+    // Feign과의 연동을 위해 필요
+    implementation("io.github.resilience4j:resilience4j-feign")
+
     // ========== test ========== //
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.kotest:kotest-runner-junit5-jvm:5.8.1") // Kotest Runner (JUnit5 위에서 동작)
