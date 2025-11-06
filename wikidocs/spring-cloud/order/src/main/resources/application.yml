@@ -26,6 +26,15 @@ resilience4j:
         # (기본적으로 모든 예외를 실패로 간주. 특정 예외를 무시할 수도 있음)
         # ignore-exceptions:
         #  - com.ecommerce.order.client.ProductNotFoundException
+  retry:
+    instances:
+      product-service:
+        max-attempts: 3 # 1. 최대 3번 시도 (첫 시도 + 2번 재시도)
+        wait-duration: 100ms # 2. 재시도 사이 100ms 대기
+        # 3. 어떤 예외 발생 시 재시도할 것인지 지정 (예: 5xx 서버 에러)
+        retry-exceptions:
+          - feign.FeignException$ServiceUnavailable
+          - java.util.concurrent.TimeoutException
 
 # --- 서킷 브레이커 동작 시나리오 ---
 # product-service에 장애가 발생했을 떄
