@@ -48,3 +48,16 @@ resilience4j:
 # 만약 3번이 모두 성공하면, 서킷은 product-service가 복구되었다고 판단하고, 상태를 다시 CLOSED로 전환한다. 시스템은 정상으로 돌아온다.
 # 만약 3번 중 한 번이라도 실패하면, 서킷은 product-service가 여전히 문제라고 판단하고, 상태를 다시 OPEN으로 되돌려 5초간 대기 상태에 들어간다.
 
+spring:
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: localhost:9092
+      # 함수가 아닌 StreamBridge를 사용할 것이므로 function.definition은 필요 없음
+      bindings:
+        # 1. 이 '출력 바인딩'의 고유한 이름. StreamBridge에서 이 이름을 사용함.
+        # 형식: <binding-name>-<in/out>-<index>
+        orderPaidEventProducer-out-0:
+          # 2. 이 바인딩이 연결될 Kafka 토픽 이름
+          destination: ecommerce.orders.paid

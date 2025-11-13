@@ -51,6 +51,11 @@ dependencies {
     // Feign과의 연동을 위해 필요
     implementation("io.github.resilience4j:resilience4j-feign")
 
+    // Spring Cloud Stream 스타터
+    implementation("org.springframework.cloud:spring-cloud-stream")
+    // Kafka 바인더 추가
+    implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka")
+
     // ========== test ========== //
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.kotest:kotest-runner-junit5-jvm:5.8.1") // Kotest Runner (JUnit5 위에서 동작)

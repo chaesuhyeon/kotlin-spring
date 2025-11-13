@@ -8,14 +8,9 @@ import jakarta.persistence.Id
 import jakarta.persistence.Table
 
 @Entity
-@Table(name = "orders")
-class Order (
-    val memberId: Long,
+class OrderLineItem (
     val productId: Long,
     val quantity: Int,
-    val unitPrice: Long,
-    val totalAmount:Long,
-    val orderLines: List<OrderLineItem>
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
