@@ -30,8 +30,12 @@ dependencies {
 
     // Spring Cloud Stream 스타터
     implementation("org.springframework.cloud:spring-cloud-stream")
+
     // Kafka 바인더 추가
     implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka")
+
+    // kafka
+    implementation("org.springframework.kafka:spring-kafka")
 }
 
 // Spring Cloud BOM 설정 필수

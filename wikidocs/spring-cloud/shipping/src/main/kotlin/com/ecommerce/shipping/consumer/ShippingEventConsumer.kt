@@ -4,27 +4,53 @@ import com.ecommerce.shipping.service.OrderPaidEvent
 import com.ecommerce.shipping.service.ShippingService
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
+import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.kafka.support.KafkaHeaders
+import org.springframework.messaging.handler.annotation.Header
+import org.springframework.messaging.handler.annotation.Payload
+import org.springframework.stereotype.Component
 
-@Configuration
+@Component
 class ShippingEventConsumer(
     private val shippingService: ShippingService // 1. 비즈니스 로직을 처리할 서비스
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    @Bean
-    fun onOrderPaid(): (OrderPaidEvent) -> Unit = { event ->
-        log.info(">> Received OrderPaidEvent: {}", event)
-        try {
-            // 2. 서비스 레이어에 작업 위임
-            shippingService.startShipping(event)
-        } catch (e: Exception) {
-            // 3. 에러 처리
-            log.error("Failed to process shipping for orderId: ${event.orderId}", e)
-            // 예외를 던지면 Spring Cloud Stream의 재시도/DLQ 메커니즘이 동작
-            throw e
-        }
+    /**
+     * @KafkaListener 어노테이션을 통해 특정 토픽과 그룹의 메시지를 구독
+     */
+    @KafkaListener(
+        topics = ["ecommerce.orders.paid"],
+        groupId = "shipping-service-group"
+    )
+    fun handleOrderPaidEvent(
+        @Payload event: OrderPaidEvent, // 1. 메시지 페이로드를 OrderPaidEvent 객체로 자동 역직렬화
+        @Header(KafkaHeaders.RECEIVED_KEY) key: String, // 2. 메시지 키 (orderId)
+        @Header(KafkaHeaders.RECEIVED_PARTITION) partition: Int,
+        @Header(KafkaHeaders.OFFSET) offset: Long
+    ) {
+        log.info(
+            "Received OrderPaidEvent (key={}, partition={}, offset={}): {}",
+            key, partition, offset, event
+        )
+        // 3. 비즈니스 로직 처리
+        shippingService.startShipping(event)
     }
+
+//
+//    @Bean
+//    fun onOrderPaid(): (OrderPaidEvent) -> Unit = { event ->
+//        log.info(">> Received OrderPaidEvent: {}", event)
+//        try {
+//            // 2. 서비스 레이어에 작업 위임
+//            shippingService.startShipping(event)
+//        } catch (e: Exception) {
+//            // 3. 에러 처리
+//            log.error("Failed to process shipping for orderId: ${event.orderId}", e)
+//            // 예외를 던지면 Spring Cloud Stream의 재시도/DLQ 메커니즘이 동작
+//            throw e
+//        }
+//    }
 }
 // ============ 실패 처리 ============
 //만약 shippingService.startShipping(event) 로직 수행 중 shipping-service의 DB 장애로 예외가 발생하면 어떻게 될까?
