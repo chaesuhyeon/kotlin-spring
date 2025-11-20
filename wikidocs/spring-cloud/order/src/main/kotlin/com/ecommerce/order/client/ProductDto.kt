@@ -11,5 +11,12 @@ data class ProductResponse(
 
 data class CreateOrderRequest(
     val productId: Long,
-    val quantity: Int
+    val quantity: Int,
+    val shippingAddress: String,
+)
+
+data class UpdateShippingRequest(
+    val productId: Long,
+    val quantity: Int,
+    val newAddress: String,
 )
