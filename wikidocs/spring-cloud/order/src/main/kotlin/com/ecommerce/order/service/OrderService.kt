@@ -118,4 +118,17 @@ class OrderService (
 
         order.cancel()
     }
+
+    /**
+     * 주문 취소 SAGA 패턴 적용 로직
+     */
+    @Transactional
+    fun cancelOrderForSaga(orderId: Long, reason: String) {
+        val order = orderRepository.findByIdOrNull(orderId)
+            ?: throw EntityNotFoundException("주문을 찾을 수 없습니다.")
+
+        // 멱등성 체크 및 비즈니스 로직은 Order 애그리거트가 담당
+        order.cancel()
+        orderRepository.save(order)
+    }
 }
