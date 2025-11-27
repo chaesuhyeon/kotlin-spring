@@ -1,6 +1,7 @@
 package com.ecommerce.order.consumer
 
 import com.ecommerce.order.event.StockDecreaseFailedEvent
+import com.ecommerce.order.event.StockDecreasedEvent
 import com.ecommerce.order.service.OrderService
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
@@ -23,5 +24,15 @@ class OrderEventConsumer (
     fun handleStockDecreaseFailed(event: StockDecreaseFailedEvent) {
         log.info("StockDecreaseFailedEvent received. Cancelling order for orderId: {}", event.orderId)
         orderService.cancelOrderForSaga(event.orderId, event.reason)
+    }
+
+
+    /**
+     * 재고 차감 이벤트를 구독하여 SAGA의 최종 상태를 반영
+     */
+    @KafkaListener(topics = ["ecommerce.stock.decreased"], groupId = "order-group")
+    fun handleStockDecreased(event: StockDecreasedEvent) {
+        log.info("StockDecreasedEvent received. Confirming order for orderId: {}", event.orderId)
+        orderService.confirmOrder(event.orderId)
     }
 }

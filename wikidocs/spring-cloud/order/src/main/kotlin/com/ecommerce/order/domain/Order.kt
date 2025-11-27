@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "orders")
@@ -18,6 +19,7 @@ class Order (
     val orderLines: List<OrderLineItem>,
     var shippingAddress: String,
     var status: OrderStatus = OrderStatus.PENDING,
+    val orderedAt : LocalDateTime
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,6 +48,13 @@ class Order (
         }
         this.status = OrderStatus.CANCELLED
     }
+
+    /**
+     * 주문 확정 로직
+     */
+    fun confirm() {
+        this.status = OrderStatus.CONFIRMED
+    }
 }
 
-enum class OrderStatus { PENDING, PAID, SHIPPED, DELIVERED, CANCELLED }
+enum class OrderStatus { PENDING, PAID, CONFIRMED, SHIPPED, DELIVERED, CANCELLED }

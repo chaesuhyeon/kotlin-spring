@@ -1,8 +1,5 @@
 package com.ecommerce.order.service
 
-import com.ecommerce.order.api.OrderResponse
-import com.ecommerce.order.api.toResponse
-import com.ecommerce.order.client.CreateOrderRequest
 import com.ecommerce.order.client.ProductServiceClient
 import com.ecommerce.order.command.CancelOrderCommand
 import com.ecommerce.order.command.CreateOrderCommand
@@ -10,91 +7,71 @@ import com.ecommerce.order.command.UpdateShippingInfoCommand
 import com.ecommerce.order.domain.Order
 import com.ecommerce.order.domain.OrderLineItem
 import com.ecommerce.order.domain.OrderRepository
-import com.ecommerce.order.event.OrderPaidEvent
+import com.ecommerce.order.event.OrderCreatedEvent
 import jakarta.persistence.EntityNotFoundException
 import org.slf4j.LoggerFactory
-import org.springframework.cloud.stream.function.StreamBridge
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.LinkedList
 
 @Service
 class OrderService (
     private val orderRepository: OrderRepository,
     private val productServiceClient: ProductServiceClient,
-    private val streamBridge: StreamBridge
+    private val orderEventProducer: OrderEventProducer
     ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
     @Transactional
-    fun createOrder(command : CreateOrderCommand) : Order {
-
+    fun createOrder(command: CreateOrderCommand): Long {
         // 간결하게 API 호출
         val product = productServiceClient.getProduct(command.productId)
 
-        // 재고 확인 로직
-        if (product.stockQuantity < command.quantity) {
-            throw IllegalArgumentException("재고가 부족합니다.")
-        }
-
-        val order = Order(
+        // 주문을 'PENDING' 상태로 생성하고 DB에 저장
+        val newOrder = Order(
             memberId = command.memberId,
-            productId = product.id,
+            productId = command.productId,
             quantity = command.quantity,
             unitPrice = product.price, // API로 조회한 실시간 가격 사용
             totalAmount = command.quantity * product.price,
             orderLines = LinkedList<OrderLineItem>(),
-            shippingAddress = command.shippingAddress
+            shippingAddress = command.shippingAddress,
+            orderedAt = LocalDateTime.now(),
+
         )
-
-        return orderRepository.save(order)
-    }
-
-    @Transactional
-    fun createAndPayOrder(command : CreateOrderCommand): OrderResponse {
-        // 간결하게 API 호출
-        val product = productServiceClient.getProduct(command.productId)
-
-        // 재고 확인 로직
-        if (product.stockQuantity < command.quantity) {
-            throw IllegalArgumentException("재고가 부족합니다.")
-        }
-
-        val order = Order(
-            memberId = command.memberId,
-            productId = product.id,
-            quantity = command.quantity,
-            unitPrice = product.price, // API로 조회한 실시간 가격 사용
-            totalAmount = command.quantity * product.price,
-            orderLines = LinkedList<OrderLineItem>(),
-            shippingAddress = command.shippingAddress
-        )
-
-        val savedOrder = orderRepository.save(order)
+        val savedOrder = orderRepository.save(newOrder)
 
         // (결제 서비스 연동 로직)
         // paymentService.processPayment(...)
         // 결제가 성공했다고 가정
 //        savedOrder.markAsPaid()
 
-        // 이벤트 생성
-        val event = OrderPaidEvent(
+
+        // SAGA를 시작하기 위한 첫 번째 이벤트 생성
+        val event = OrderCreatedEvent(
             orderId = savedOrder.id!!,
+            productId = savedOrder.productId,
+            quantity = savedOrder.quantity,
             memberId = savedOrder.memberId,
-            totalAmount = savedOrder.totalAmount.toBigDecimal(),
-            orderLines = savedOrder.orderLines.map {
-                OrderPaidEvent.OrderLineItem(it.productId, it.quantity)
-            }
+            totalAmount = savedOrder.totalAmount,
+            orderedAt = savedOrder.orderedAt
         )
 
-        // --- StreamBridge로 이벤트 발행 ---
-        // 첫 번째 인자: application.yml에 정의한 바인딩 이름
-        // 두 번째 인자: 보낼 이벤트 객체
-        val isSent = streamBridge.send("orderPaidEventProducer-out-0", event)
-        log.info("OrderPaidEvent sent for orderId {}: {}", savedOrder.id, isSent)
+        // Kafka로 이벤트 발행
+        orderEventProducer.sendOrderCreatedEvent(event)
 
-        return savedOrder.toResponse()
+        return savedOrder.id!!
+    }
+
+
+    @Transactional
+    fun confirmOrder(orderId: Long) {
+        val order = orderRepository.findByIdOrNull(orderId) ?: return
+        order.confirm() // 주문 상태를 CONFIRMED로 변경
+        orderRepository.save(order)
+        log.info("Order for orderId {} has been confirmed.", orderId)
     }
 
     /**

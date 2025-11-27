@@ -1,5 +1,6 @@
 package com.ecommerce.order.service
 
+import com.ecommerce.order.event.OrderCreatedEvent
 import com.ecommerce.order.event.OrderPaidEvent
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
@@ -25,4 +26,6 @@ class OrderEventProducer(
         // send(토픽, 키, 값)
         kafkaTemplate.send(topic, key, event)
     }
+
+    fun sendOrderCreatedEvent(event: OrderCreatedEvent) {}
 }
